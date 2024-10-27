@@ -1,7 +1,9 @@
 import random
 from utils.image import show_image
+from utils.test import check_mask_alignment
 import cv2
 import numpy as np
+import pandas as pd
 import os
 
 def random_color():
@@ -31,7 +33,8 @@ def create_basic_test_image(border_thickness=30, test_square=70, num_sensors=14,
     # Draw sensor squares
     x_ptr = x_offset + border_thickness + margins
     y_ptr = margins + border_thickness
-    for color in [random_color() for _ in range(num_sensors)]:
+    colors = [random_color() for _ in range(num_sensors)]
+    for color in colors:
         cv2.rectangle(image, (x_ptr, y_ptr), (x_ptr + test_square, y_ptr + test_square), color, -1)
         x_ptr += test_square + margins
 
@@ -42,13 +45,14 @@ def create_basic_test_image(border_thickness=30, test_square=70, num_sensors=14,
                   (x_offset + strip_length + border_thickness, y_offset + strip_width + border_thickness),
                   (255, 255, 255), -1)
     cv2.rectangle(reading_mask, (x_offset, y_offset),
-                  (x_offset + strip_length + border_thickness, y_offset + strip_width + border_thickness),
+                  (x_offset + strip_length + 2 * border_thickness, y_offset + strip_width + 2 * border_thickness),
                   (255, 255, 255), -1)
 
-    return image, mask, reading_mask
+    # show_image([image,mask,reading_mask])
+
+    return image, mask, reading_mask, colors
 
 def apply_random_perspective(image, mask, reading_mask, max_warp=30):
-    h, w = image.shape[:2]
 
     # Add padding for perspective transform
     padding = max_warp
@@ -65,6 +69,8 @@ def apply_random_perspective(image, mask, reading_mask, max_warp=30):
     warped_mask = cv2.warpPerspective(padded_mask, matrix, (pw, ph))
     warped_reading_mask = cv2.warpPerspective(padded_reading_mask, matrix, (pw, ph))
 
+    # show_image([warped_image, warped_mask, warped_reading_mask])
+
     return warped_image, warped_mask, warped_reading_mask
 
 def rotate_image(image, angle):
@@ -80,7 +86,8 @@ def rotate_image(image, angle):
     rotated_image = cv2.warpAffine(image, rotation_matrix, (new_w, new_h), borderValue=(0, 0, 0))
     return rotated_image
 
-def overlay_strip_on_background(strip_image, strip_mask, strip_reading_mask, background_image, scale_factor=0.2):
+def overlay_strip_on_background(strip_image, strip_mask, strip_reading_mask, background_image, scale_factor_lower=0.8, scale_factor_higher=1):
+    scale_factor = random.uniform(scale_factor_lower, scale_factor_higher)
     strip_image = cv2.resize(strip_image, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_AREA)
     strip_mask = cv2.resize(strip_mask, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_AREA)
     strip_reading_mask = cv2.resize(strip_reading_mask, None, fx=scale_factor, fy=scale_factor, interpolation=cv2.INTER_AREA)
@@ -105,24 +112,38 @@ def overlay_strip_on_background(strip_image, strip_mask, strip_reading_mask, bac
 
     background_mask = np.zeros_like(background_image)
     background_mask[y_offset:y_offset + strip_h, x_offset:x_offset + strip_w] = strip_mask
+
     return background_image, background_mask
 
 def synthesize_images(num_images=5, output_dir='../data/synthetic_data'):
     os.makedirs(output_dir, exist_ok=True)
+    _color_save_dict = {}
     for i in range(num_images):
         backgrounds = load_background_images()
-        strip_image, strip_mask, strip_reading_mask = create_basic_test_image()
+        strip_image, strip_mask, strip_reading_mask, colors = create_basic_test_image()
         warped_strip, warped_mask, warped_reading_mask = apply_random_perspective(strip_image, strip_mask, strip_reading_mask)
+
         angle = random.uniform(-30, 30)
         rotated_strip = rotate_image(warped_strip, angle)
         rotated_mask = rotate_image(warped_mask, angle)
         rotated_reading_mask = rotate_image(warped_reading_mask, angle)
+
+        # show_image([rotated_strip, rotated_mask, rotated_reading_mask])
+
         background = random.choice(backgrounds) if backgrounds else np.ones((640, 480, 3), dtype=np.uint8) * 255
         final_image, final_mask = overlay_strip_on_background(rotated_strip, rotated_mask, rotated_reading_mask, background)
-        show_image([final_image, final_mask], f"Synthetic Image {i+1}")
-        # cv2.imwrite(os.path.join(output_dir, f'synthetic_image_{i + 1}.png'), final_image)
 
-def load_background_images(path='../data/real_data/Backgrounds', target_size = (1080, 1920)):
+        # show_image([final_image, final_mask], 0.25)
+        # check_mask_alignment(final_image, final_mask)
+
+        image_name = f'synthetic_image_{i + 1}.png'
+        cv2.imwrite(os.path.join(output_dir+"/generated_image", image_name), final_image)
+        cv2.imwrite(os.path.join(output_dir+"/generated_mask", image_name), final_mask)
+        _color_save_dict[image_name]=colors
+
+    return _color_save_dict
+
+def load_background_images(path='../data/real_data/Backgrounds', target_size = (1920, 1080)):
     backgrounds = []
     for filename in os.listdir(path):
         img = cv2.imread(os.path.join(path, filename))
@@ -131,5 +152,38 @@ def load_background_images(path='../data/real_data/Backgrounds', target_size = (
             backgrounds.append(img)
     return backgrounds
 
+def save_color_dict_to_csv(color_dict, excel_file='../data/synthetic_data/strip_colors.csv'):
+    """
+    Convert color_dict to a DataFrame and save it to an Excel file.
 
-synthesize_images(10)
+    Parameters:
+    - color_dict (dict): Dictionary with image names as keys and an array of 14 colors as values.
+    - excel_file (str): Path to save the Excel file.
+    """
+    # Prepare the data for DataFrame
+    data = []
+
+    for image_name, colors in color_dict.items():
+        # Flatten the color array into a dictionary
+        color_entry = {'Image Name': image_name}
+        for j, color in enumerate(colors, start=1):
+            color_entry[f'Color {j} (B)'] = color[0]
+            color_entry[f'Color {j} (G)'] = color[1]
+            color_entry[f'Color {j} (R)'] = color[2]
+
+        data.append(color_entry)
+
+    # Create a DataFrame
+    color_df = pd.DataFrame(data)
+
+    # Save the DataFrame to an Excel file
+    color_df.to_csv(excel_file, index=False)
+    print(f"Color data saved to {excel_file}")
+
+
+
+
+
+color_save_dict = synthesize_images(250)
+save_color_dict_to_csv(color_save_dict)
+
