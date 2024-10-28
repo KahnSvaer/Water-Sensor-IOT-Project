@@ -14,7 +14,7 @@ class CustomBottomNavBar extends StatelessWidget {
       builder: (context, currentIndex, child) {
         return BottomAppBar(
           color: AppColors.primaryColor,
-          height: 70,
+          height: 64,
           padding: EdgeInsets.zero,
           child: Row(
             children: [
@@ -76,19 +76,13 @@ class CustomBottomNavBar extends StatelessWidget {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              minimumSize: Size(0, 60),
             ),
-            child: Container(
-              height: 60,
-              width: double.infinity,
-              alignment: Alignment.center,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     icon,
-                    size: (currentIndex == index && isHighlighted) ? 30.0 : 24.0,
+                    size: (currentIndex == index && isHighlighted) ? 28.0 : 24.0,
                     color: (currentIndex == index && isHighlighted)
                         ? Colors.white
                         : Colors.white70,
@@ -104,7 +98,6 @@ class CustomBottomNavBar extends StatelessWidget {
                   ),
                 ],
               ),
-            ),
           );
         },
       ),

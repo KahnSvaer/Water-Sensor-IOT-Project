@@ -1,9 +1,15 @@
-// home_page.dart
-
 import 'package:flutter/material.dart';
+
 import '../state_management/app_state.dart'; // Import the AppState singleton
-import '../widgets/custom_bottom_nav_bar.dart'; // Import the custom bottom nav bar
 import '../constants/colors.dart';
+
+import '../widgets/custom_bottom_nav_bar.dart'; // Import the custom bottom nav bar
+
+import 'history.dart';
+import 'home.dart';
+import 'scan.dart';
+import 'setting.dart';
+
 
 class BackgroundPage extends StatelessWidget {
   final AppState appState = AppState();
@@ -12,6 +18,15 @@ class BackgroundPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
+    final List<Widget> pages = [
+      ScansPage(),     // Replace with your actual ScanPage widget
+      HomePage(),     // Replace with your actual HomePage widget
+      HistoryPage(),  // Replace with your actual HistoryPage widget
+      SettingPage(), // Replace with your actual SettingsPage widget
+    ];
+
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: AppColors.primaryColor,
@@ -22,10 +37,7 @@ class BackgroundPage extends StatelessWidget {
           return Container(
             color: Colors.white70, // Change this to your background color
             child: Center(
-              child: Text(
-                'Current Page Index: $index', // Display current index
-                style: TextStyle(fontSize: 12),
-              ),
+              child: pages[index],
             ),
           );
         },
