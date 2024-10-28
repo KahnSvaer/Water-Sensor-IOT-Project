@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1003215337220",
+    "project_id": "aqua-read",
+    "storage_bucket": "aqua-read.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1003215337220:android:184966afdade95d3e5c251",
+        "android_client_info": {
+          "package_name": "com.AquaRead.aqua_read"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKttnoC6QFUKgxF_8R7Nm3pKx6dce9ffo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
