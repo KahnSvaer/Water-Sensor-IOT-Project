@@ -10,26 +10,24 @@ class HomePage extends StatelessWidget {
     ValueNotifier<int> graphIndexNotifier = ValueNotifier<int>(0);
 
     return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Extra Blue Container
-          _buildExtraContainer(),
-
-          SizedBox(height: 20),
-          
-          Container(
-            padding: EdgeInsets.all(16),
-            child: Column(
-              children: [
-                _buildCustomDropdown(context, graphIndexNotifier),
-                SizedBox(height: 20),
-                _buildChartPlaceholder(graphIndexNotifier),
-                SizedBox(height: 20),
-                _buildActionButtons(),
-              ],
-            ),
-          )
-        ],
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Extra Blue Container
+        _buildExtraContainer(),
+        SizedBox(height: 20),
+        Container(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
+              _buildCustomDropdown(context, graphIndexNotifier),
+              SizedBox(height: 20),
+              _buildChartPlaceholder(graphIndexNotifier),
+              SizedBox(height: 20),
+              _buildActionButtons(),
+            ],
+          ),
+        )
+      ],
     );
   }
 
@@ -66,15 +64,34 @@ class HomePage extends StatelessWidget {
                 border: Border.all(color: Colors.grey),
                 borderRadius: BorderRadius.circular(4),
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    graphIndexNotifier.value == 0 ? "pH" : graphIndexNotifier.value == 1 ? "TDS" : "Other", // Display the selected value
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  Icon(Icons.arrow_drop_down),
-                ],
+              child: ValueListenableBuilder<int>(
+                valueListenable: graphIndexNotifier, // Listen to changes
+                builder: (context, value, child) {
+                  String displayValue;
+                  switch (value) {
+                    case 0:
+                      displayValue = "pH";
+                      break;
+                    case 1:
+                      displayValue = "TDS";
+                      break;
+                    case 2:
+                      displayValue = "Other";
+                      break;
+                    default:
+                      displayValue = "Select a quantity";
+                  }
+                  return Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        displayValue, // Display the selected value
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      Icon(Icons.arrow_drop_down),
+                    ],
+                  );
+                },
               ),
             ),
           ),
@@ -82,7 +99,7 @@ class HomePage extends StatelessWidget {
         IconButton(
           icon: Icon(Icons.info_outline),
           onPressed: () {
-            // Show information about the selected quantity
+            _showInfoDialog(context, graphIndexNotifier.value);
           },
         ),
       ],
@@ -179,6 +196,41 @@ class HomePage extends StatelessWidget {
           child: Text("View Test History"), // Updated button text
         ),
       ],
+    );
+  }
+
+  void _showInfoDialog(BuildContext context, int selectedIndex) {
+    String infoText;
+    switch (selectedIndex) {
+      case 0:
+        infoText = "pH measures the acidity or alkalinity of water. Ideal pH for drinking water is between 6.5 and 8.5.";
+        break;
+      case 1:
+        infoText = "TDS (Total Dissolved Solids) indicates the concentration of dissolved substances in water. Lower values are preferred for drinking water.";
+        break;
+      case 2:
+        infoText = "Other parameters may include turbidity, hardness, and more. Ensure to check the relevant limits.";
+        break;
+      default:
+        infoText = "Select a quantity for more information.";
+    }
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Information"),
+          content: Text(infoText),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text("Close"),
+            ),
+          ],
+        );
+      },
     );
   }
 }

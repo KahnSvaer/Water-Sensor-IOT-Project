@@ -9,7 +9,7 @@ class AppState {
 
   factory AppState() {return _instance;}
 
-  final ValueNotifier<int> backgroundPageIndex = ValueNotifier<int>(0);
+  final ValueNotifier<int> backgroundPageIndex = ValueNotifier<int>(1);
   final ValueNotifier<bool> buttonHighlight = ValueNotifier<bool>(true);
 
   void updateIndex(int index) {
