@@ -39,6 +39,12 @@ dependencies:
   firebase_core: ^2.4.0  # Check for the latest version
   cloud_firestore: ^4.3.0  # For Firestore database operations
 
+  # Image picker for accessing the camera and gallery
+  image_picker: ^0.8.7+3
+
+  # Permission handler for requesting camera permissions
+  permission_handler: ^10.2.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

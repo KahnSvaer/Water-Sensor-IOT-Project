@@ -1,8 +1,69 @@
 import 'package:aqua_read/constants/colors.dart';
 import 'package:flutter/material.dart';
+import 'dart:io';
+import '../services/camera_service.dart';
+import 'package:permission_handler/permission_handler.dart';
 
-class ScansPage extends StatelessWidget {
+class ScansPage extends StatefulWidget {
   const ScansPage({super.key});
+
+  @override
+  _ScansPageState createState() => _ScansPageState();
+}
+
+class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
+  final CameraService _cameraService = CameraService();
+  File? _selectedImage;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this); // Add observer for lifecycle
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this); // Remove observer
+    super.dispose();
+  }
+
+  // Handle app lifecycle changes
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      // Check permissions when app resumes
+      _checkPermissions();
+    }
+  }
+
+  // Method to re-check permissions
+  Future<void> _checkPermissions() async {
+    if (await Permission.camera.isDenied || await Permission.photos.isDenied) {
+      setState(() {
+        _selectedImage = null; // Clear the image if permission is denied
+      });
+    }
+  }
+
+  // Method to handle image selection from camera
+  Future<void> _selectImageFromCamera() async {
+    final image = await _cameraService.pickImageFromCamera(context);
+    if (image != null) {
+      setState(() {
+        _selectedImage = image;
+      });
+    }
+  }
+
+  // Method to handle image selection from gallery
+  Future<void> _selectImageFromGallery() async {
+    final image = await _cameraService.pickImageFromGallery(context);
+    if (image != null) {
+      setState(() {
+        _selectedImage = image;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,7 +86,7 @@ class ScansPage extends StatelessWidget {
           // Inner container with image and buttons
           Expanded(
             child: Container(
-              margin: EdgeInsets.fromLTRB(0,10,0,20),
+              margin: EdgeInsets.fromLTRB(0, 10, 0, 20),
               padding: EdgeInsets.all(16.0),
               decoration: BoxDecoration(
                 color: Colors.grey[200],
@@ -42,23 +103,26 @@ class ScansPage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Image container with 60% of page height
+                  // Image container with selected image or placeholder icon
                   Expanded(
-                      child: Container(
-                    height: MediaQuery.of(context).size.height * 0.4,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.image,
-                        size: 80,
-                        color: Colors.grey[400],
+                    child: Container(
+                      height: MediaQuery.of(context).size.height * 0.4,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Center(
+                        child: _selectedImage != null
+                            ? Image.file(_selectedImage!)
+                            : Icon(
+                          Icons.image,
+                          size: 80,
+                          color: Colors.grey[400],
+                        ),
                       ),
                     ),
-                  )),
+                  ),
                   SizedBox(height: 20),
 
                   // Camera and Gallery buttons
@@ -66,9 +130,7 @@ class ScansPage extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       TextButton.icon(
-                        onPressed: () {
-                          // Camera function here
-                        },
+                        onPressed: _selectImageFromCamera,
                         style: TextButton.styleFrom(
                           backgroundColor: AppColors.secondaryColor,
                           padding: EdgeInsets.symmetric(horizontal: 20),
@@ -83,9 +145,7 @@ class ScansPage extends StatelessWidget {
                         ),
                       ),
                       TextButton.icon(
-                        onPressed: () {
-                          // Gallery function here
-                        },
+                        onPressed: _selectImageFromGallery,
                         style: TextButton.styleFrom(
                           backgroundColor: AppColors.secondaryColor,
                           padding: EdgeInsets.symmetric(horizontal: 20),
@@ -105,7 +165,6 @@ class ScansPage extends StatelessWidget {
               ),
             ),
           ),
-
 
           // Analyze button outside the inner container
           SizedBox(
