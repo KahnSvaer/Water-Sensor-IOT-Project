@@ -12,7 +12,20 @@
           "package_name": "com.AquaRead.aqua_read"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "1003215337220-cfnierg0oi21f92k60lvnrdr6rgrc832.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.AquaRead.aqua_read",
+            "certificate_hash": "499c7c8a92e6e79538102913ebfae37585ae0ecf"
+          }
+        },
+        {
+          "client_id": "1003215337220-67kieoujaukkdvrci54f2t4snntahcb8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
           "current_key": "AIzaSyBKttnoC6QFUKgxF_8R7Nm3pKx6dce9ffo"
@@ -20,7 +33,19 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1003215337220-67kieoujaukkdvrci54f2t4snntahcb8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1003215337220-8ne6u2dmi6vaohdhf3pvt7t5l9sffajh.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.AquaRead.aquaRead"
+              }
+            }
+          ]
         }
       }
     }

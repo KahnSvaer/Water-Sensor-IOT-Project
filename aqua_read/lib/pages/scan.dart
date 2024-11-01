@@ -18,34 +18,30 @@ class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // Add observer for lifecycle
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
   void dispose() {
-    WidgetsBinding.instance.removeObserver(this); // Remove observer
+    WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
 
-  // Handle app lifecycle changes
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // Check permissions when app resumes
       _checkPermissions();
     }
   }
 
-  // Method to re-check permissions
   Future<void> _checkPermissions() async {
     if (await Permission.camera.isDenied || await Permission.photos.isDenied) {
       setState(() {
-        _selectedImage = null; // Clear the image if permission is denied
+        _selectedImage = null;
       });
     }
   }
 
-  // Method to handle image selection from camera
   Future<void> _selectImageFromCamera() async {
     final image = await _cameraService.pickImageFromCamera(context);
     if (image != null) {
@@ -55,7 +51,6 @@ class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
     }
   }
 
-  // Method to handle image selection from gallery
   Future<void> _selectImageFromGallery() async {
     final image = await _cameraService.pickImageFromGallery(context);
     if (image != null) {
@@ -83,7 +78,6 @@ class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
               fontSize: 24,
             ),
           ),
-          // Inner container with image and buttons
           Expanded(
             child: Container(
               margin: EdgeInsets.fromLTRB(0, 10, 0, 20),
@@ -103,7 +97,6 @@ class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Image container with selected image or placeholder icon
                   Expanded(
                     child: Container(
                       height: MediaQuery.of(context).size.height * 0.4,
@@ -124,8 +117,6 @@ class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
                     ),
                   ),
                   SizedBox(height: 20),
-
-                  // Camera and Gallery buttons
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -166,26 +157,27 @@ class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
             ),
           ),
 
-          // Analyze button outside the inner container
-          SizedBox(
-            width: double.infinity,
-            child: TextButton(
-              onPressed: () {
-                // Analyze function here
-              },
-              style: TextButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: Colors.green[400],
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+          // Analyze button only shown if an image is selected
+          if (_selectedImage != null)
+            SizedBox(
+              width: double.infinity,
+              child: TextButton(
+                onPressed: () {
+                  // Analyze function here
+                },
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 14),
+                  backgroundColor: Colors.green[400],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
+                child: Text(
+                  "Analyze",
+                  style: TextStyle(fontSize: 18, color: Colors.white),
                 ),
               ),
-              child: Text(
-                "Analyze",
-                style: TextStyle(fontSize: 18, color: Colors.white),
-              ),
             ),
-          ),
         ],
       ),
     );
