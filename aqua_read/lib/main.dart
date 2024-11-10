@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
           useMaterial3: true,
         ),
-        home: const AuthLandingPage(), // Your initial landing page
+        home: BackgroundPage(), // Your initial landing page
       ),
     );
   }

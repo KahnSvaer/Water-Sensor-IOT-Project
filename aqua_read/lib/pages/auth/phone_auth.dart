@@ -1,6 +1,5 @@
+import 'package:aqua_read/controller/authController.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import '../../state_management/auth_provider.dart';
 import 'option.dart';
 import '../../controller/navigatorController.dart';
 
@@ -12,10 +11,10 @@ class PhoneAuthScreen extends StatefulWidget {
 }
 
 class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
+  final SignInMethods signInMethods = SignInMethods();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
   bool _isOtpSent = false; // Flag to track if OTP has been sent
-  String? _verificationId; // Store verification ID for OTP verification
 
   @override
   Widget build(BuildContext context) {
@@ -54,62 +53,28 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                             prefixText: '+91 ', // Add country code prefix if needed
                           ),
                           keyboardType: TextInputType.phone,
+                          readOnly: _isOtpSent, // Make field read-only if OTP is sent
                         ),
                         const SizedBox(height: 10),
                         if (_isOtpSent) ...[
                           TextField(
                             controller: _otpController,
                             decoration: const InputDecoration(
-                              labelText: 'OTP',
+                              labelText: 'Enter OTP',
                               contentPadding: EdgeInsets.symmetric(vertical: 10.0),
                             ),
                             keyboardType: TextInputType.number,
                           ),
                           const SizedBox(height: 10),
-                        ],
-                        SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton(
+                          ElevatedButton(
                             onPressed: () async {
-                              final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                              if (_isOtpSent) {
-                                // Handle OTP verification logic here
-                                String otp = _otpController.text.trim();
-                                if (otp.isNotEmpty && _verificationId != null) {
-                                  await authProvider.registerWithOtp(_verificationId!, otp, 'Display Name'); // Replace 'Display Name' with actual display name
-                                  // Navigate to the next screen after successful verification
-                                } else {
-                                  // Show error message if OTP is empty
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Please enter the OTP.')),
-                                  );
-                                }
+                              String otp = _otpController.text.trim();
+                              if (otp.isNotEmpty) {
+                                signInMethods.verifyOTPLogin(context, _otpController.text);
                               } else {
-                                // Handle phone sign-in logic here
-                                String phoneNumber = _phoneController.text.trim();
-                                if (phoneNumber.isNotEmpty) {
-                                  await authProvider.registerWithPhoneNumber(
-                                    phoneNumber,
-                                    'Display Name', // Replace 'Display Name' with actual display name
-                                        (verificationId) {
-                                      setState(() {
-                                        _isOtpSent = true; // Mark that OTP has been sent
-                                        _verificationId = verificationId; // Store the verification ID
-                                      });
-                                    },
-                                        (errorMessage) {
-                                      // Show error message on verification failure
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(content: Text(errorMessage)),
-                                      );
-                                    },
-                                  );
-                                } else {
-                                  // Show error message if phone number is empty
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Please enter a valid phone number.')),
-                                  );
-                                }
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Please enter the OTP.')),
+                                );
                               }
                             },
                             style: ElevatedButton.styleFrom(
@@ -117,9 +82,33 @@ class _PhoneAuthScreenState extends State<PhoneAuthScreen> {
                                 borderRadius: BorderRadius.circular(8.0),
                               ),
                             ),
-                            child: Text(_isOtpSent ? 'Verify OTP' : 'Send OTP'),
+                            child: const Text('Verify OTP'),
                           ),
-                        ),
+                          const SizedBox(height: 10),
+                        ],
+                        if (!_isOtpSent) ...[
+                          ElevatedButton(
+                            onPressed: () async {
+                              String phoneNumber = '+91${_phoneController.text.trim()}';
+                              if (phoneNumber.isNotEmpty) {
+                                signInMethods.sendOTPtoPhoneLogin(context, phoneNumber);
+                                setState(() {
+                                  _isOtpSent = true; // Update state to indicate OTP was sent
+                                });
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Please enter a valid phone number.')),
+                                );
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8.0),
+                              ),
+                            ),
+                            child: const Text('Send OTP'),
+                          ),
+                        ],
                         const SizedBox(height: 20),
                         const Divider(thickness: 1.5),
                         TextButton(

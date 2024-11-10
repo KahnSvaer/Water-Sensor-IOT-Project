@@ -24,7 +24,8 @@ class AuthProvider extends ChangeNotifier {
       uid: user.uid,
       email: user.email ?? '',
       displayName: user.displayName ?? '',
-      phoneNumber: user.phoneNumber ?? '', // You might want to remove this line as well if not needed
+      phoneNumber: user.phoneNumber ??
+          '', // You might want to remove this line as well if not needed
     );
   }
 
@@ -35,8 +36,10 @@ class AuthProvider extends ChangeNotifier {
   }
 
   // Register a new user with email (WORKS)
-  Future<void> registerWithEmail(String email, String password, String displayName) async {
-    final firebaseUser = await _authService.registerWithEmailAndDisplayName(email, password, displayName);
+  Future<void> registerWithEmail(String email, String password,
+      String displayName) async {
+    final firebaseUser = await _authService.registerWithEmailAndDisplayName(
+        email, password, displayName);
     _updateCurrentUser(firebaseUser);
   }
 
@@ -64,4 +67,69 @@ class AuthProvider extends ChangeNotifier {
     _user = null; // Clear the current user
     notifyListeners();
   }
+
+  //Code for sending OTP to phone (WORKS)
+  String? verificationID;
+  Future<List<String?>> registerWithPhoneNumber(String phoneNumber, String displayName) async {
+    String? errorMessage;
+    String? isAutoVerified;
+    final firebaseUser = await _authService.registerWithPhoneNumber(
+      phoneNumber: phoneNumber,
+      onCodeSent: (String verificationId) {
+        verificationID = verificationId;
+      },
+      onVerificationFailed: (Exception  e) {
+          errorMessage = 'Failed to Register';  // Fallback to a general error message
+        notifyListeners();  // Notify listeners of the error state
+      },
+      onUserAlreadyExists: (String message) {
+        errorMessage = message;  // Capture the specific "user exists" message
+        notifyListeners();  // Notify listeners of the error state
+      },
+      displayName: displayName,
+    );
+    if (firebaseUser != null){
+      _updateCurrentUser(firebaseUser);
+      isAutoVerified = 't';
+    }
+    return [errorMessage, isAutoVerified];
+  }
+
+  // New method for verifying OTP
+  Future<void> registerWithOtpPhone(String verificationId, String smsCode, String displayName) async {
+      final firebaseUser = await _authService.registerWithOtpPhone(
+        verificationId: verificationId,
+        smsCode: smsCode,
+        displayName: displayName,);
+      _updateCurrentUser(firebaseUser);
+  }
+
+  Future<List<String?>> loginWithPhoneNumber(String phoneNumber) async {
+    String? errorMessage;
+    String? isAutoVerified;
+    final firebaseUser = await _authService.loginWithPhoneNumber(
+      phoneNumber: phoneNumber,
+      onCodeSent: (String verificationId) {
+        verificationID = verificationId;
+      },
+      onVerificationFailed: (Exception  e) {
+        errorMessage = 'Failed to Register';  // Fallback to a general error message
+        notifyListeners();  // Notify listeners of the error state
+      },
+    );
+    if (firebaseUser != null){
+      _updateCurrentUser(firebaseUser);
+      isAutoVerified = 't';
+    }
+    return [errorMessage, isAutoVerified];
+  }
+
+  // New method for verifying OTP
+  Future<void> loginWithOtpPhone(String verificationId, String smsCode) async {
+    final firebaseUser = await _authService.loginWithOtpPhone(
+      verificationId: verificationId,
+      smsCode: smsCode,);
+    _updateCurrentUser(firebaseUser);
+  }
+
 }

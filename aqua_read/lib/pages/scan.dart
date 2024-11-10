@@ -1,8 +1,9 @@
 import 'package:aqua_read/constants/colors.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import '../services/camera_service.dart';
-import 'package:permission_handler/permission_handler.dart';
+import '../services/result_service.dart'; // Import ResultService
 
 class ScansPage extends StatefulWidget {
   const ScansPage({super.key});
@@ -13,6 +14,7 @@ class ScansPage extends StatefulWidget {
 
 class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
   final CameraService _cameraService = CameraService();
+  final ResultService _resultService = ResultService();  // Instantiate ResultService
   File? _selectedImage;
 
   @override
@@ -57,6 +59,19 @@ class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
       setState(() {
         _selectedImage = image;
       });
+    }
+  }
+
+  // Function to handle analysis and save data using ResultService
+  Future<void> _analyzeAndSaveData() async {
+    if (_selectedImage != null) {
+      // Analyze and save the result using the ResultService
+      await _resultService.analyzeAndSaveStrip();
+
+      // Optionally, show a success message
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Data saved to database")),
+      );
     }
   }
 
@@ -162,9 +177,7 @@ class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
             SizedBox(
               width: double.infinity,
               child: TextButton(
-                onPressed: () {
-                  // Analyze function here
-                },
+                onPressed: _analyzeAndSaveData, // Call the function when pressed
                 style: TextButton.styleFrom(
                   padding: EdgeInsets.symmetric(vertical: 14),
                   backgroundColor: Colors.green[400],

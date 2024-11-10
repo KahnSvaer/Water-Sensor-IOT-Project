@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../services/sql_lite_service.dart'; // Import HistoryService
 import '../entities/results.dart'; // Ensure this import is correct
 
 class HistoryPage extends StatelessWidget {
@@ -7,38 +7,44 @@ class HistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Placeholder for future fetched results
-    List<AnalysisResult> results = [
-      AnalysisResult(id: "1", date: "2024-10-01", result: "pH: 7.0, Turbidity: 5 NTU"),
-      AnalysisResult(id: "2", date: "2024-10-05", result: "Chlorine: 1.5 mg/L"),
-      AnalysisResult(id: "3", date: "2024-10-10", result: "Nitrate: 2.0 mg/L"),
-      AnalysisResult(id: "4", date: "2024-10-15", result: "Lead: 0.01 mg/L"),
-
-    ]; // Fake data for testing
+    final historyService = SqlLiteService();
+    historyService.fetchTestResults();
 
     return SafeArea(
       child: Container(
-        padding: EdgeInsets.all(16.0), // Add padding for better layout
+        padding: const EdgeInsets.all(16.0), // Add padding for better layout
         child: Column(
           children: [
-            Text(
+            const Text(
               'History Page',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             Expanded(
-              child: results.isEmpty
-                  ? Center(
-                child: Text(
-                  'Nothing to show yet.',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-              )
-                  : ListView.builder(
-                itemCount: results.length, // Use the fake data length
-                itemBuilder: (context, index) {
-                  return ResultCard(
-                    result: results[index],
-                  );
+              child: ValueListenableBuilder<List<Result>?>(
+                valueListenable: historyService.results,
+                builder: (context, results, child) {
+                  // If results are null, show loading, else show list or empty state
+                  if (results == null) {
+                    return const Center(
+                      child: CircularProgressIndicator(), // Loading indicator
+                    );
+                  }
+
+                  return results.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Nothing to show yet.',
+                            style: TextStyle(fontSize: 18, color: Colors.grey),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: results.length,
+                          itemBuilder: (context, index) {
+                            return ResultCard(
+                              result: results[index],
+                            );
+                          },
+                        );
                 },
               ),
             ),
@@ -49,9 +55,8 @@ class HistoryPage extends StatelessWidget {
   }
 }
 
-
 class ResultCard extends StatelessWidget {
-  final AnalysisResult result;
+  final Result result;
 
   const ResultCard({
     required this.result,
@@ -67,31 +72,33 @@ class ResultCard extends StatelessWidget {
       ),
       child: OutlinedButton(
         style: OutlinedButton.styleFrom(
-          padding: EdgeInsets.all(16.0), // Padding for button
-          side: BorderSide(color: Colors.blue), // Outline color
+          padding: const EdgeInsets.all(16.0), // Padding for button
+          side: const BorderSide(color: Colors.blue), // Outline color
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8.0), // Match card's corners
           ),
         ),
         onPressed: () {
           // Handle button press action
-          print('${result.id} - ${result.date} pressed'); // Just for demonstration
         },
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.start, // Align items to the start
+          mainAxisAlignment:
+              MainAxisAlignment.start, // Align items to the start
           children: [
-            Icon(Icons.calendar_today, size: 24), // Icon on the left
-            SizedBox(width: 8), // Spacing between icon and text
+            const Icon(Icons.calendar_today, size: 24), // Icon on the left
+            const SizedBox(width: 8), // Spacing between icon and text
             Column(
-              crossAxisAlignment: CrossAxisAlignment.start, // Align text to the start
+              crossAxisAlignment:
+                  CrossAxisAlignment.start, // Align text to the start
               children: [
                 Text(
-                  result.date, // Display the date
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  "${result.date.toLocal()}".split(' ')[0], // Format the date
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.bold),
                 ),
-                SizedBox(height: 4), // Spacing between date and result
+                const SizedBox(height: 4), // Spacing between date and result
                 Text(
-                  result.result, // Display the result details
+                  result.getDetails(), // Display the result details
                   style: TextStyle(fontSize: 14, color: Colors.grey[700]),
                 ),
               ],
@@ -102,4 +109,3 @@ class ResultCard extends StatelessWidget {
     );
   }
 }
-

@@ -29,9 +29,4 @@ class NavigationController {
       ModalRoute.withName(targetWidget.toString()), // or any unique identifier
     );
   }
-
-  // Get the current widget at the top of the stack
-  Widget? getCurrent() {
-    return null; // Implement as needed
-  }
 }

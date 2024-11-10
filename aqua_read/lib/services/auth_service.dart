@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:http/http.dart' as http; // For making API calls
 import 'package:google_sign_in/google_sign_in.dart'; // For Google Sign-In
 
 class AuthService {
@@ -9,7 +8,7 @@ class AuthService {
   // Stream to listen for authentication state changes
   Stream<User?> get authStateChanges => _auth.authStateChanges();
 
-  // Sign in with email and password (WORKS DONT TOUCH)
+  // Sign in with email and password
   Future<User?> signInWithEmail(String email, String password) async {
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
@@ -83,77 +82,42 @@ class AuthService {
     }
   }
 
-  // Function to verify phone number
-  Future<void> verifyPhoneNumber({
-    required String phoneNumber,
-    required Function(String verificationId) onVerificationCompleted,
-    required Function(FirebaseAuthException) onVerificationFailed,
-    required Function(PhoneAuthCredential) onAutoVerificationCompleted,
-    required Function(String, int?) onCodeSent,
-  }) async {
-    await _auth.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // Auto-retrieval callback, e.g., for instant verification in certain cases.
-        onAutoVerificationCompleted(credential);
-      },
-      verificationFailed: (FirebaseAuthException e) {
-        // Callback for failed verification attempts.
-        onVerificationFailed(e);
-      },
-      codeSent: (String verificationId, int? resendToken) {
-        // Callback when the verification code is sent.
-        onCodeSent(verificationId, resendToken);
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {
-        // Called when auto code retrieval times out.
-      },
-      timeout: const Duration(seconds: 60), // Customize the timeout as needed.
-    );
-  }
-
-  // Function to verify OTP and sign in the user
-  Future<User?> signInWithPhoneNumber({
-    required String verificationId,
-    required String smsCode,
-  }) async {
-    PhoneAuthCredential credential = PhoneAuthProvider.credential(
-      verificationId: verificationId,
-      smsCode: smsCode,
-    );
-
-    try {
-      UserCredential userCredential = await _auth.signInWithCredential(
-          credential);
-      return userCredential.user;
-    } catch (e) {
-      print('Error during phone sign-in: $e');
-      rethrow;
-    }
-  }
-
   // Function to register a user using phone number verification
-  Future<void> registerWithPhoneNumber({
+  Future<User?> registerWithPhoneNumber({
     required String phoneNumber,
-    required String displayName,
     required Function(String verificationId) onCodeSent,
     required Function(FirebaseAuthException) onVerificationFailed,
-    required Function(PhoneAuthCredential) onAutoVerificationCompleted,
+    required Function(String) onUserAlreadyExists,
+    required String displayName,
   }) async {
+    User? autoRetrievedUser;
+
     await _auth.verifyPhoneNumber(
       phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {
-        // Auto verification callback
-        UserCredential userCredential = await _auth.signInWithCredential(credential);
-        User? user = userCredential.user;
+      verificationCompleted: (PhoneAuthCredential credential) async { //Function called in case of auto-retrieval of code
+        try {
+          UserCredential userCredential = await _auth.signInWithCredential(credential);
+          User? user = userCredential.user;
 
-        // Check if this is a new user and update the display name
-        if (user != null && userCredential.additionalUserInfo?.isNewUser == true) {
-          await user.updateDisplayName(displayName);
-          await user.reload();
+          if (user != null && userCredential.additionalUserInfo?.isNewUser == true){
+            await user.updateDisplayName(displayName);
+            await user.reload();
+            autoRetrievedUser = user;
+          }
+          else if (user != null && userCredential.additionalUserInfo?.isNewUser == false){
+            throw FirebaseAuthException(
+              code: 'phone-number-already-in-use',
+              message: 'This phone number is already registered.',
+            );
+          }
+        } catch (e) {
+          if (e is FirebaseAuthException && e.code == 'phone-number-already-in-use') {
+            onUserAlreadyExists('This phone number is already registered.');
+          } else {
+            onVerificationFailed(FirebaseAuthException(
+                code: 'unknown-error', message: e.toString()));
+          }
         }
-
-        onAutoVerificationCompleted(credential);
       },
       verificationFailed: (FirebaseAuthException e) {
         // Handle verification failure
@@ -166,12 +130,13 @@ class AuthService {
       codeAutoRetrievalTimeout: (String verificationId) {
         // Code retrieval timeout
       },
-      timeout: const Duration(seconds: 60),
+      timeout: const Duration(seconds: 120),
     );
+    return autoRetrievedUser;
   }
 
   // Function to complete registration with the entered OTP
-  Future<User?> registerWithOtp({
+  Future<User?> registerWithOtpPhone({
     required String verificationId,
     required String smsCode,
     required String displayName,
@@ -186,14 +151,72 @@ class AuthService {
       User? user = userCredential.user;
 
       // If it's a new user, update their display name
+      // THis would always be true as check for new user done previous code most prolly
       if (user != null && userCredential.additionalUserInfo?.isNewUser == true) {
         await user.updateDisplayName(displayName);
         await user.reload();
       }
-
       return user;
     } catch (e) {
       print('Error during phone registration: $e');
+      rethrow;
+    }
+  }
+
+  // Function to re-verify a user's phone number
+  Future<User?> loginWithPhoneNumber({
+    required String phoneNumber,
+    required Function(String verificationId) onCodeSent,
+    required Function(FirebaseAuthException) onVerificationFailed,
+  }) async {
+    User? autoRetrieval;
+    await _auth.verifyPhoneNumber(
+      phoneNumber: phoneNumber,
+      verificationCompleted: (PhoneAuthCredential credential) async {
+        try {
+          UserCredential userCredential = await _auth.signInWithCredential(credential);
+          User? user = userCredential.user;
+          autoRetrieval = user;
+        } catch (e) {
+          onVerificationFailed(FirebaseAuthException(
+            code: 'unknown-error',
+            message: e.toString(),
+          ));
+        }
+      },
+      verificationFailed: (FirebaseAuthException e) {
+        // Handle verification failure
+        onVerificationFailed(e);
+      },
+      codeSent: (String verificationId, int? resendToken) {
+        // Triggered when the OTP is sent
+        onCodeSent(verificationId);
+      },
+      codeAutoRetrievalTimeout: (String verificationId) {
+        // Code retrieval timeout
+      },
+      timeout: const Duration(seconds: 120),
+    );
+    return autoRetrieval;
+  }
+
+  // Function to complete re-verification with the entered OTP
+  Future<User?> loginWithOtpPhone({
+    required String verificationId,
+    required String smsCode,
+  }) async {
+    PhoneAuthCredential credential = PhoneAuthProvider.credential(
+      verificationId: verificationId,
+      smsCode: smsCode,
+    );
+
+    try {
+      UserCredential userCredential = await _auth.signInWithCredential(credential);
+      User? user = userCredential.user;
+
+      return user;
+    } catch (e) {
+      print('Error during re-verification: $e');
       rethrow;
     }
   }

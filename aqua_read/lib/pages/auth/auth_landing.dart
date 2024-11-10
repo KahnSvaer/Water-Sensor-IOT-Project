@@ -1,6 +1,4 @@
-import 'package:aqua_read/state_management/auth_provider.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 import 'email_auth.dart';
 import 'phone_auth.dart';
 import 'signup.dart';
