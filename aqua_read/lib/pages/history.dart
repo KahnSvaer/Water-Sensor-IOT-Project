@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../services/sql_lite_service.dart'; // Import HistoryService
+import '../controller/sql_lite_controller.dart'; // Import HistoryService
 import '../entities/results.dart'; // Ensure this import is correct
 
 class HistoryPage extends StatelessWidget {
@@ -7,7 +7,7 @@ class HistoryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final historyService = SqlLiteService();
+    final historyService = SqlLiteController();
     historyService.fetchTestResults();
 
     return SafeArea(

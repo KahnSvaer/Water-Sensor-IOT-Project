@@ -1,6 +1,6 @@
+import 'package:aqua_read/pages/auth/auth_landing.dart';
 import 'package:flutter/material.dart';
 import '../../controller/navigatorController.dart';
-import 'option.dart';
 
 class ForgetPasswordScreen extends StatefulWidget {
   const ForgetPasswordScreen({super.key});
@@ -189,7 +189,7 @@ class BackToLoginLink extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () {
-        NavigationController(context).pushAndPopUntilRoot(OtherSignInOptionsScreen());
+        NavigationController(context).pushAndPopUntilRoot(AuthLandingPage());
       },
       child: const Text('Other Sign In options'),
     );

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../controller/sqlLiteController.dart';
+import '../service/sql_lite_service.dart';
 import '../entities/results.dart'; // Ensure this import is correct
 
-class SqlLiteService {
+class SqlLiteController {
   // Create a ValueNotifier for results
   ValueNotifier<List<Result>?> results = ValueNotifier<List<Result>?>(null);
 

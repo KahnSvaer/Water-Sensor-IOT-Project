@@ -71,7 +71,7 @@ class LocalDatabaseHelper {
   // Insert a test result with all 14 parameters
   Future<int> insertTestResult(Result result) async {
     Database db = await database;
-    return await db.insert(table, result.toMapSQL());
+    return await db.insert(table, result.toMap());
   }
 
   // Get all test results

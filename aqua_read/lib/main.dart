@@ -18,14 +18,18 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (context) => AuthProvider(), // Create an instance of AuthProvider
-      child: MaterialApp(
-        title: 'AquaRead',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
-        ),
-        home: BackgroundPage(), // Your initial landing page
+      create: (context) => AuthProvider(),
+      child: Consumer<AuthProvider>(
+        builder: (context, authProvider, _) {
+          return MaterialApp(
+            title: 'AquaRead',
+            theme: ThemeData(
+              colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+              useMaterial3: true,
+            ),
+            home: AuthLandingPage(), // Navigate based on authentication status
+          );
+        },
       ),
     );
   }

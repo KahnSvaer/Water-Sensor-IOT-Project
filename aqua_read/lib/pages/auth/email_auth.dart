@@ -1,10 +1,10 @@
+import 'package:aqua_read/pages/auth/auth_landing.dart';
 import 'package:aqua_read/state_management/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../controller/navigatorController.dart';
-import 'option.dart';
+import '../../controller/auth_controller.dart';
 import 'forgetPassword.dart';
-import '../../controller/authController.dart';
 
 class EmailAuthScreen extends StatefulWidget {
   const EmailAuthScreen({super.key});
@@ -118,7 +118,7 @@ class _EmailAuthScreenState extends State<EmailAuthScreen> {
                         // Other Sign-In Options Button
                         TextButton(
                           onPressed: () {
-                            NavigationController(context).pushAndPopUntilRoot(OtherSignInOptionsScreen());
+                            NavigationController(context).pushAndPopUntilRoot(AuthLandingPage());
                           },
                           child: const Text('Other Sign-In Options'),
                         ),

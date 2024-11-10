@@ -2,8 +2,8 @@ import 'package:aqua_read/constants/colors.dart';
 import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
-import '../services/camera_service.dart';
-import '../services/result_service.dart'; // Import ResultService
+import '../service/camera_service.dart';
+import '../controller/result_controller.dart'; // Import ResultService
 
 class ScansPage extends StatefulWidget {
   const ScansPage({super.key});
@@ -14,7 +14,7 @@ class ScansPage extends StatefulWidget {
 
 class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
   final CameraService _cameraService = CameraService();
-  final ResultService _resultService = ResultService();  // Instantiate ResultService
+  final ResultController _resultService = ResultController();  // Instantiate ResultService
   File? _selectedImage;
 
   @override

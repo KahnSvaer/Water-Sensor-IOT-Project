@@ -17,16 +17,15 @@ class NavigationController {
     );
   }
 
+  void changeRootAfterSignIn(Widget widget) {
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (context) => widget),
+          (Route<dynamic> route) => false, // This removes all previous routes
+    );
+  }
+
   // Pop the last widget from the stack
   void pop() {
     Navigator.pop(context);
-  }
-
-  // Pop until the specified widget is found
-  void popUntil(Widget targetWidget) {
-    Navigator.popUntil(
-      context,
-      ModalRoute.withName(targetWidget.toString()), // or any unique identifier
-    );
   }
 }

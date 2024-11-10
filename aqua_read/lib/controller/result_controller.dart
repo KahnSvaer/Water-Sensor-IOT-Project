@@ -1,9 +1,11 @@
 import 'package:aqua_read/entities/results.dart';
 import 'package:flutter/cupertino.dart';
-import 'sql_lite_service.dart';
+import 'sql_lite_controller.dart';
+import 'firstore_controller.dart';
 
-class ResultService {
-  final SqlLiteService _sqlLiteService = SqlLiteService();
+class ResultController {
+  final SqlLiteController _sqlLiteService = SqlLiteController();
+  final FirestoreController _firestoreService = FirestoreController();
   final ValueNotifier<Result?> latestTestResult = ValueNotifier<Result?>(null);
 
   // Method for analyzing the strip image and saving the result to SQLite
@@ -20,6 +22,7 @@ class ResultService {
 
     // Save the result to SQLite
     await _sqlLiteService.insertTestResult(result);
+    await _firestoreService.insertTestResult(result);
   }
 
   // Method to clear the latest test result

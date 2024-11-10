@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
+import '../../controller/auth_controller.dart';
 import 'email_auth.dart';
-import 'phone_auth.dart';
 import 'signup.dart';
 import '../../controller/navigatorController.dart';
-
-import '../../controller/authController.dart';
 
 class AuthLandingPage extends StatelessWidget {
   const AuthLandingPage({super.key});
@@ -81,46 +79,22 @@ class AuthLandingPage extends StatelessWidget {
                         const SizedBox(height: 10),
                         const Text('Sign in using', style: TextStyle(fontSize: 16)),
                         const SizedBox(height: 10),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween, // Ensures equal spacing
-                          children: [
-                            Expanded(
-                              child: TextButton.icon(
-                                onPressed: () => SignInMethods().signInGoogle(context),
-                                icon: const Icon(
-                                  Icons.g_mobiledata, // Default Google icon
-                                  color: Colors.black,
-                                ),
-                                label: const Text('Google'),
-                                style: TextButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0), // Rounded corners
-                                  ),
-                                  foregroundColor: Colors.black,
-                                  backgroundColor: Colors.white,
-                                  side: const BorderSide(color: Colors.blue),
-                                ),
-                              ),
+                        TextButton.icon(
+                          onPressed: () => SignInMethods().signInGoogle(context),
+                          icon: const Icon(
+                            Icons.g_mobiledata, // Default Google icon
+                            color: Colors.black,
+                          ),
+                          label: const Text('Google'),
+                          style: TextButton.styleFrom(
+                            minimumSize: Size(double.infinity, 0),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10.0), // Rounded corners
                             ),
-                            const SizedBox(width: 10),
-                            Expanded(
-                              child: TextButton.icon(
-                                onPressed: () {
-                                  NavigationController(context).pushAndPopUntilRoot(PhoneAuthScreen());
-                                },
-                                icon: const Icon(Icons.phone, color: Colors.black),
-                                label: const Text('Phone'),
-                                style: TextButton.styleFrom(
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10.0), // Rounded corners
-                                  ),
-                                  foregroundColor: Colors.black,
-                                  backgroundColor: Colors.white,
-                                  side: const BorderSide(color: Colors.blue),
-                                ),
-                              ),
-                            ),
-                          ],
+                            foregroundColor: Colors.black,
+                            backgroundColor: Colors.white,
+                            side: const BorderSide(color: Colors.blue),
+                          ),
                         ),
                         const SizedBox(height: 10), // Reduced space before Continue button
                         TextButton(

@@ -41,31 +41,8 @@ class Result {
   }) : date = date ?? DateTime.now();
 
   // Unified function for JSON and SQLite
-  Map<String, dynamic> toMapSQL() {
+  Map<String, dynamic> toMap() {
     return {
-      'testDate': date.toIso8601String(),
-      'pH': pH,
-      'totalAlkalinity': totalAlkalinity,
-      'hardness': hardness,
-      'lead': lead,
-      'copper': copper,
-      'iron': iron,
-      'chromiumCrVI': chromiumCrVI,
-      'freeChlorine': freeChlorine,
-      'bromine': bromine,
-      'nitrate': nitrate,
-      'nitrite': nitrite,
-      'mercury': mercury,
-      'sulfite': sulfite,
-      'fluoride': fluoride,
-      'details': details,
-    };
-  }
-
-  // Unified function for JSON and SQLite
-  Map<String, dynamic> toMapFirebase() {
-    return {
-      'userID': _getCurrentUserId(),
       'testDate': date.toIso8601String(),
       'pH': pH,
       'totalAlkalinity': totalAlkalinity,
