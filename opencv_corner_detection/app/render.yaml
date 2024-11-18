@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: flask-color-segmentor
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app.main:app
+    plan: free
