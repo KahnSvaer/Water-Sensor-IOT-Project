@@ -28,4 +28,11 @@ class NavigationController {
   void pop() {
     Navigator.pop(context);
   }
+
+  void push(Widget widget) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => widget),
+    );
+  }
 }

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'dart:io';
 import '../service/camera_service.dart';
-import '../controller/result_controller.dart'; // Import ResultService
+import '../service/result_service.dart'; // Import ResultService
 
 class ScansPage extends StatefulWidget {
   const ScansPage({super.key});
@@ -14,7 +14,7 @@ class ScansPage extends StatefulWidget {
 
 class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
   final CameraService _cameraService = CameraService();
-  final ResultController _resultService = ResultController();  // Instantiate ResultService
+  final ResultService _resultService = ResultService();  // Instantiate ResultService
   File? _selectedImage;
 
   @override
@@ -66,7 +66,7 @@ class _ScansPageState extends State<ScansPage> with WidgetsBindingObserver {
   Future<void> _analyzeAndSaveData() async {
     if (_selectedImage != null) {
       // Analyze and save the result using the ResultService
-      await _resultService.analyzeAndSaveStrip();
+      await _resultService.analyzeAndSaveStrip(context, _selectedImage!.path);
 
       // Optionally, show a success message
       ScaffoldMessenger.of(context).showSnackBar(

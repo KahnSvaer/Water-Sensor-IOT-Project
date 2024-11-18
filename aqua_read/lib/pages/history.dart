@@ -1,6 +1,8 @@
+import 'package:aqua_read/controller/navigatorController.dart';
 import 'package:flutter/material.dart';
 import '../controller/sql_lite_controller.dart'; // Import HistoryService
 import '../entities/results.dart'; // Ensure this import is correct
+import '../pages/result_showcase.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
@@ -79,7 +81,7 @@ class ResultCard extends StatelessWidget {
           ),
         ),
         onPressed: () {
-          // Handle button press action
+          NavigationController(context).push(ResultWidgetPage(futureResult: Future.value(result),));
         },
         child: Row(
           mainAxisAlignment:
