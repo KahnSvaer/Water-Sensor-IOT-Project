@@ -1,7 +1,12 @@
+# Exported from Render on 2024-11-18T01:08:12Z
 services:
-  - type: web
-    name: flask-color-segmentor
-    runtime: python
-    buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app.main:app
-    plan: free
+- type: web
+  name: Water-Sensor-Aqua-Read
+  runtime: python
+  repo: https://github.com/KahnSvaer/Water-Sensor-IOT-Project
+  plan: free
+  region: oregon
+  buildCommand: pip install -r requirements.txt
+  startCommand: gunicorn app.main:app
+  rootDir: opencv_corner_detection/app
+version: "2"
