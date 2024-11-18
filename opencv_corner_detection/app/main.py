@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import os
 from werkzeug.utils import secure_filename
 import Color_segmentor as colSeg
+import logging
 
 app = Flask(__name__)
 
@@ -16,6 +17,7 @@ def allowed_file(filename):
 
 @app.route('/process_image', methods=['POST'])
 def process_image():
+    app.logger.debug('Received request for /process_image')
     if 'image' not in request.files or 'template' not in request.files:
         return jsonify({'error': 'Both image and template files are required'}), 400
 
