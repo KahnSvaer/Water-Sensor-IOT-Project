@@ -7,6 +7,5 @@ services:
   plan: free
   region: oregon
   buildCommand: pip install -r requirements.txt
-  startCommand: gunicorn app.main:app
+  startCommand: gunicorn main:app
   rootDir: opencv_corner_detection/app
-version: "2"
