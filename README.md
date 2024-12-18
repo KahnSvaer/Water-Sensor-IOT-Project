@@ -57,7 +57,3 @@ We welcome contributions from the community! If you'd like to contribute, please
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
-
-Made with ❤️ by [Your Name](https://your-website-link).
-
